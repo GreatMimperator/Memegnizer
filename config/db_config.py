@@ -1,14 +1,3 @@
-import os
-from defenitions import ROOT_DIR
-
-import yaml
-
-
-def open_config():
-    with open(os.path.join(ROOT_DIR, "config.yaml"), 'r') as config_file:
-        return yaml.safe_load(config_file)
-
-
 def receive_postgres_config_part(config):
     return config["postgres"]
 

@@ -1,12 +1,12 @@
 import sqlalchemy
 from sqlalchemy import Engine
 
-from config import db_config
+from config import db_config, init_config
 
 
 def create_postgres_engine_from_config(config=None) -> Engine:
     if config is None:
-        config = db_config.open_config()
+        config = init_config.open_config()
     user = db_config.receive_postgres_user(config)
     password = db_config.receive_postgres_password(config)
     host = db_config.receive_postgres_host(config)
