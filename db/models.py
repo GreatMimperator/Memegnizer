@@ -10,7 +10,7 @@ class File(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     namespace_dir_path = Column(Text)
-    filename = Column(Text)
+    filename_without_extension = Column(Text)
 
     # Define relationships
     prompts = relationship('Prompt', back_populates='file', uselist=False)

@@ -8,3 +8,7 @@ def receive_source_dir_path(config):
 
 def receive_processed_dir_path(config):
     return receive_path_config_part(config)["processed_dir"]
+
+
+def receive_tmp_dir_path(config):
+    return receive_path_config_part(config)["tmp_dir"]

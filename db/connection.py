@@ -3,6 +3,8 @@ from sqlalchemy import Engine
 
 from config import db_config, init_config
 
+SHOW_SQL = True
+
 
 def create_postgres_engine_from_config(config=None) -> Engine:
     if config is None:
@@ -13,4 +15,4 @@ def create_postgres_engine_from_config(config=None) -> Engine:
     port = db_config.receive_postgres_port(config)
     database = db_config.receive_postgres_database(config)
     database_url = f'postgresql://{user}:{password}@{host}:{port}/{database}'
-    return sqlalchemy.create_engine(database_url)
+    return sqlalchemy.create_engine(database_url, echo=SHOW_SQL)
