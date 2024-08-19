@@ -1,18 +1,14 @@
 import os
-import shutil
-import time
-from logging import Logger
 from typing import Optional
 
-from PIL import Image
 from retrying import retry
-from sqlalchemy import delete, select, insert, and_
+from sqlalchemy import insert
 from sqlalchemy.orm import sessionmaker
 
 from config import init_config, path_config
 from db import connection, db_queries
-from db.models import Prompt, File
-from prompt_receive import coco_image_prompt_receiver
+from db.models import Prompt
+from prompt_receive.lib import coco_image_prompt_receiver
 from util import log_util, file_util, media_util
 from util.log_util import init_time_count_of_logger
 from util.media_util import VideoImageEnum
@@ -43,6 +39,7 @@ def try_receive_prompt(file_path: str, server_image_name: str) -> Optional[str]:
         raise Exception(f"Too much exceptions, aborting... (example of last one: {e})")
 
 
+# TODO: отделить заполнение File от заполнения Prompt
 if __name__ == '__main__':
     config = init_config.open_config()
     processed_dir_path = path_config.receive_processed_dir_path(config)
