@@ -1,4 +1,5 @@
 import os
+import time
 
 from sqlalchemy import insert
 from sqlalchemy.orm import sessionmaker
@@ -12,9 +13,10 @@ from util import media_util, file_util
 from util.log_util import init_time_count_of_logger
 from util.media_util import VideoImageEnum
 
-verbose = False
+verbose = True
 
-if __name__ == '__main__':
+
+def ocr_receive():
     config = init_config.open_config()
     processed_dir_path = path_config.receive_processed_dir_path(config)
 
@@ -68,7 +70,6 @@ if __name__ == '__main__':
     for i, (file_id, file_name) in enumerate(input_dir_db_registered_image_files_id_and_name):
         file_path = os.path.join(processed_dir_path, file_name)
         ocr_text = receive_image_ocr(file_path)
-        file_name_no_ext = file_util.get_file_name_without_extension(file_name)
         db_queries.execute_insert_in_session(
             insert(Ocr).values(ocr=ocr_text, file_id=file_id),
             Session,
@@ -78,3 +79,9 @@ if __name__ == '__main__':
             f"Requested and put to db {file_name} image ocr successfully!",
             i, input_dir_db_registered_image_file_count
         )
+
+
+if __name__ == '__main__':
+    while True:
+        time.sleep(1800)
+        ocr_receive()

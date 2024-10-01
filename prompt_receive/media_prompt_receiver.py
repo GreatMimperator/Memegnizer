@@ -1,4 +1,5 @@
 import os
+import time
 from typing import Optional
 
 from retrying import retry
@@ -7,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 
 from config import init_config, path_config
 from db import connection, db_queries
+from db.connection import create_postgres_engine_from_config
 from db.models import Prompt
 from prompt_receive.lib import coco_image_prompt_receiver
 from util import log_util, file_util, media_util
@@ -15,8 +17,8 @@ from util.media_util import VideoImageEnum
 
 force_reload = False
 
-TRIES_LIMIT = 10
-SLEEP_AFTER_FAIL_SECS = 10
+TRIES_LIMIT = 5
+SLEEP_AFTER_FAIL_SECS = 30
 
 log = log_util.init_common_logger(__name__)
 
@@ -40,10 +42,10 @@ def try_receive_prompt(file_path: str, server_image_name: str) -> Optional[str]:
 
 
 # TODO: отделить заполнение File от заполнения Prompt
-if __name__ == '__main__':
+def prompts_receive():
     config = init_config.open_config()
     processed_dir_path = path_config.receive_processed_dir_path(config)
-    engine = connection.create_postgres_engine_from_config(config)
+    engine = create_postgres_engine_from_config(config)
     connection = engine.connect()
     Session = sessionmaker(connection)
     if force_reload:
@@ -72,6 +74,7 @@ if __name__ == '__main__':
         match video_image_enum:
             case VideoImageEnum.IMAGE:
                 prompts.append(try_receive_prompt(file_path, filename))
+                time.sleep(5)
 
             case VideoImageEnum.VIDEO:
                 try:
@@ -89,6 +92,7 @@ if __name__ == '__main__':
                     try:
                         frame.save(temp_filepath, format="PNG")
                         prompt = try_receive_prompt(temp_filepath, server_image_name)
+                        time.sleep(5)
                     finally:
                         os.remove(temp_filepath)
                         frame.close()
@@ -128,3 +132,7 @@ if __name__ == '__main__':
             )
             session.commit()
             connection.commit()
+
+
+if __name__ == '__main__':
+    prompts_receive()

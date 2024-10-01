@@ -64,7 +64,7 @@ def load_image(path_on_server: str, token: str, file_path: str) -> str:
 
 def get_prompt_id_query(prompt_url: str) -> str:
     """Получит по ссылке текст промпта"""
-    base_url = "https://cococlip.ai/api/v1/imageclip"
+    base_url = "https://cococlip.ai/api/v1/imagetoprompt/imageclip"
 
     # Параметры запроса
     params = {
@@ -83,7 +83,7 @@ def get_prompt_id_query(prompt_url: str) -> str:
 
 @retry(stop_max_delay=RECEIVE_PROMPT_MAX_DELAY_SECS * 1000)
 def receive_prompt_by_id(prompt_id: str):
-    base_url = "https://cococlip.ai/api/v1/imageclippoll"
+    base_url = "https://cococlip.ai/api/v1/imagetoprompt/imageclippoll"
 
     params = {
         'promptId': prompt_id,

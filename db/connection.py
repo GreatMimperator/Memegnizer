@@ -3,7 +3,7 @@ from sqlalchemy import Engine
 
 from config import db_config, init_config
 
-SHOW_SQL = True
+SHOW_SQL = False
 
 
 def create_postgres_engine_from_config(config=None) -> Engine:
