@@ -1,17 +1,10 @@
 import io
-from enum import Enum
-from typing import Optional
+import os
+import tempfile
+
 import cv2
-
-import filetype
+import numpy as np
 from PIL import Image
-from numpy import ndarray
-
-
-class VideoImageEnum(Enum):
-    VIDEO = "video"
-    IMAGE = "image"
-    ANOTHER = "another"
 
 
 class VideoInfo:
@@ -19,17 +12,6 @@ class VideoInfo:
         self.duration = frame_count / fps
         self.frame_count = frame_count
         self.fps = fps
-
-
-def guess_video_image(path: str) -> Optional[VideoImageEnum]:
-    kind = filetype.guess(path)
-    if kind is None:
-        return None
-    if kind.mime.startswith("video") or kind.extension == "gif":
-        return VideoImageEnum.VIDEO
-    if kind.mime.startswith("image"):
-        return VideoImageEnum.IMAGE
-    return VideoImageEnum.ANOTHER
 
 
 def get_video_info(video_path: str) -> VideoInfo:
@@ -67,19 +49,13 @@ def extract_frames_from_begin_middle_end(video_path: str, video_time_padding_sec
     finally:
         cap.release()
 
-
-def cv2_to_pillow_png(img: ndarray):
+def cv2_to_pillow_png(img: np.ndarray):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     pil_image = Image.fromarray(img)
     buffer = io.BytesIO()
     pil_image.save(buffer, format='PNG')
-
-    # Seek to the start of the BytesIO buffer
     buffer.seek(0)
-
-    # Load the PNG image back into a PIL Image object
     return Image.open(buffer)
-
 
 def extract_frames(video_capture: cv2.VideoCapture, frame_timestamps_secs: list[float]) -> list[Image]:
     extracted_frames: list[Image] = []
@@ -90,3 +66,23 @@ def extract_frames(video_capture: cv2.VideoCapture, frame_timestamps_secs: list[
             raise Exception(f"Failed to extract frame at {frame_timestamp_secs} seconds")
         extracted_frames.append(cv2_to_pillow_png(frame))
     return extracted_frames
+
+def convert_to_jpg_bytes(image: Image):
+    image_rgb = image.convert('RGB')
+    img_byte_arr = io.BytesIO()
+    image_rgb.save(img_byte_arr, format='JPEG')
+    return img_byte_arr.getvalue()
+
+def extract_frames_from_begin_middle_end_video_bytearray(video_data: bytearray, video_time_padding_secs=0.5):
+    # Создаём уникальный временный файл для передачи в extract_frames_from_begin_middle_end
+    with tempfile.NamedTemporaryFile(delete=False) as temp_video_file:
+        temp_video_file.write(video_data)
+        temp_video_path = temp_video_file.name
+
+    try:
+        # Теперь вызываем функцию с созданным временным файлом
+        return extract_frames_from_begin_middle_end(temp_video_path, video_time_padding_secs)
+    finally:
+        # Удаляем временный файл после использования
+        if os.path.exists(temp_video_path):
+            os.remove(temp_video_path)

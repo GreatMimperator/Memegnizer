@@ -1,0 +1,14 @@
+ollama
+sqlalchemy
+retrying
+python-telegram-bot~=21.10
+requests
+Pillow
+pyyaml
+deep_translator
+easyocr
+opencv-python
+imageio-ffmpeg
+av
+ffmpeg-python
+numpy

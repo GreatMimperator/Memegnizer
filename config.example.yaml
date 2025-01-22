@@ -1,0 +1,13 @@
+postgres:
+  database: memegnizer
+  user: postgres
+  password: password
+  host: localhost
+  port: 5432
+telegram:
+  bot_token: AAAAAAA:AAAAAAAAAAAAAAAAAAAAA
+  channel_id: -1234567890
+llm:
+  ollama:
+    llama3.2-vision:
+      image_describe_prompt: Describe the objects in the image directly, listing their characteristics (e.g., color, type, material, and position). Avoid introductory or contextual phrases
