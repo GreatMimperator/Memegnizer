@@ -1,6 +1,9 @@
 import io
 import os
 import tempfile
+from typing import Optional
+
+from moviepy import VideoFileClip
 
 import cv2
 import numpy as np
@@ -86,3 +89,23 @@ def extract_frames_from_begin_middle_end_video_bytearray(video_data: bytearray, 
         # Удаляем временный файл после использования
         if os.path.exists(temp_video_path):
             os.remove(temp_video_path)
+
+def extract_audio_from_mp4(mp4_bytearray) -> Optional[str]:
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as temp_video_file:
+        temp_video_file.write(mp4_bytearray)
+        temp_video_file_path = temp_video_file.name
+
+    video_clip = VideoFileClip(temp_video_file_path)
+    audio_clip = video_clip.audio
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_audio_file:
+        audio_path = temp_audio_file.name
+        try:
+            audio_clip.write_audiofile(audio_path)  # Save audio as WAV file
+        except Exception as e:
+            # gif, no sound
+            return None
+
+    os.remove(temp_video_file_path)
+
+    return audio_path

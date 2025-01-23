@@ -3,8 +3,9 @@ import json
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
-from config.telegram_config import receive_telegram_bot_token
-from redis_util import RedisQueue
+from config.telegram_config import receive_telegram_bot_token, receive_telegram_admin_id
+from redis_util.redis_queue_utils import RedisQueue
+from redis_util.task_model import Task
 
 
 class MessageReceiver:
@@ -16,41 +17,34 @@ class MessageReceiver:
     async def handle_message(self, update: Update, context: CallbackContext):
         """Обработчик всех типов сообщений с добавлением фильтров."""
         message = update.message
-        chat_id = message.chat.id
-        message_id = message.message_id
+        if message.from_user.id != receive_telegram_admin_id(self.config):
+            await message.reply_text("Вы не являетесь админом")
+            pass
+        task = Task()
+        task.chat_id = message.chat_id
+        task.message_id = message.message_id
 
-        mime_type = None
-        file_id = None
         # Проверка типа фильтра на основе типа сообщения
         if message.photo:
-            filter_type = filters.PHOTO.name
-            file_id = message.photo[-1].file_id
+            task.filter_type = filters.PHOTO.name
+            task.file_id = message.photo[-1].file_id
         elif message.video:
-            filter_type = filters.VIDEO.name
-            file_id = message.video.file_id
+            task.filter_type = filters.VIDEO.name
+            task.file_id = message.video.file_id
         elif message.animation:
-            filter_type = filters.ANIMATION.name
-            file_id = message.animation.file_id
+            task.filter_type = filters.ANIMATION.name
+            task.file_id = message.animation.file_id
         elif message.document:
-            filter_type = filters.ATTACHMENT.name
+            task.filter_type = filters.ATTACHMENT.name
             document = message.document
-            mime_type = document.mime_type
-            file_id = document.file_id
+            task.mime_type = document.mime_type
+            task.file_id = document.file_id
         elif message.text:
-            filter_type = filters.TEXT.name
+            task.filter_type = filters.TEXT.name
         else:
-            await message.reply_text("Я не поддерживаю такие сообщения", reply_to_message_id=message_id)
+            await message.reply_text("Я не поддерживаю такие сообщения", reply_to_message_id=message.message_id)
             return
 
-        task = {
-            "chat_id": chat_id,
-            "user_id": update.message.from_user.id,
-            "message_id": message_id,
-            "file_id": file_id,
-            "filter_type": filter_type,
-            "mime_type": mime_type,
-            "text": message.text,
-        }
         self.redis_queue.enqueue(task)
 
     def start(self):

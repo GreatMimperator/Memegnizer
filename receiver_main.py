@@ -1,5 +1,5 @@
 from config.init_config import open_config
-from redis_util.RedisQueue import initialize_redis, RedisQueue
+from redis_util.redis_queue_utils import RedisQueue, initialize_redis
 from tg.receiver_bot import MessageReceiver
 
 if __name__ == '__main__':

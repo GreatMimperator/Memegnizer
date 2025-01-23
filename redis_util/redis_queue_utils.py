@@ -4,7 +4,8 @@ import json
 import redis
 from redis import Redis
 
-from config.redis_config import receive_redis_config
+from config.redis_config import receive_redis_host, receive_redis_port, receive_redis_db
+from redis_util.task_model import Task
 
 
 class RedisQueue:
@@ -12,22 +13,19 @@ class RedisQueue:
         self.redis_client = redis_client
         self.queue_name = queue_name
 
-    def enqueue(self, task: dict):
+    def enqueue(self, task: Task):
         """Добавление задачи в очередь."""
-        self.redis_client.rpush(self.queue_name, json.dumps(task))
+        self.redis_client.rpush(self.queue_name, json.dumps(task.to_dict()))
 
-    def dequeue(self):
+    def dequeue(self) -> Task:
         """Извлечение задачи из очереди."""
         task = self.redis_client.lpop(self.queue_name)
-        return json.loads(task) if task else None
+        return Task.from_dict(json.loads(task)) if task else None
 
 
-# Инициализация Redis
 def initialize_redis(config) -> Redis:
-    redis_config = receive_redis_config(config)
-    redis_client = redis.StrictRedis(
-        host=redis_config["host"], 
-        port=int(redis_config["port"]),
-        db=int(redis_config["db"])
+    return redis.StrictRedis(
+        host=receive_redis_host(config),
+        port=int(receive_redis_port(config)),
+        db=int(receive_redis_db(config))
     )
-    return redis_client

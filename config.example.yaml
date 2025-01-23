@@ -7,6 +7,7 @@ postgres:
 telegram:
   bot_token: AAAAAAA:AAAAAAAAAAAAAAAAAAAAA
   channel_id: -1234567890
+  admin_id: 123456789
 redis:
   host: 127.0.0.1
   port: 6379
