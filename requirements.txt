@@ -12,3 +12,4 @@ imageio-ffmpeg
 av
 ffmpeg-python
 numpy
+redis

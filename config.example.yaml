@@ -7,6 +7,10 @@ postgres:
 telegram:
   bot_token: AAAAAAA:AAAAAAAAAAAAAAAAAAAAA
   channel_id: -1234567890
+redis:
+  host: 127.0.0.1
+  port: 6379
+  db: 0
 llm:
   ollama:
     llama3.2-vision:
